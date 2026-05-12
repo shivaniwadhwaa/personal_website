@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanIT — Have a Tale Behind Your Trip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal-dark: #1E5A5A;
+  --teal: #2D7070;
+  --teal-mid: #3D8A8A;
+  --teal-light: #4FA8A8;
+  --teal-glass: rgba(45,112,112,0.35);
+  --teal-glass2: rgba(45,112,112,0.55);
+  --sand: #F0EAD6;
+  --sand-mid: #E0D9C4;
+  --white: #FFFFFF;
+  --ink: #1A2E2E;
+  --ink-muted: rgba(255,255,255,0.65);
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--sans);
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 50%, #1A4A4A 100%);
+  min-height: 100vh;
+  color: #fff;
+  font-size: 16px;
+  overflow-x: hidden;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; animation: fadeIn 0.3s ease; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+}
+.logo {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-style: italic;
+  color: var(--sand);
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.logo-plane { font-size: 1rem; }
+.home-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--teal-glass); border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: pointer; color: #fff;
+  transition: background 0.2s;
+}
+.home-btn:hover { background: var(--teal-glass2); }
+
+/* ── BOTTOM NAV ── */
+.bottomnav {
+  display: flex; justify-content: space-around; align-items: center;
+  padding: 0.85rem 1rem;
+  background: rgba(0,0,0,0.2);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: auto;
+}
+.nav-item {
+  width: 48px; height: 38px; border-radius: 20px;
+  background: rgba(240,234,214,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; cursor: pointer;
+  transition: background 0.2s; border: none; color: #fff;
+}
+.nav-item.active { background: rgba(240,234,214,0.4); }
+.nav-item:hover { background: rgba(240,234,214,0.3); }
+
+/* ── MAIN CONTENT ── */
+.content { flex: 1; padding: 0 1.5rem 1rem; overflow-y: auto; }
+
+/* ── GLASS PILL / ROW ── */
+.glass-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--teal-glass); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50px; padding: 0.75rem 1.25rem;
+  margin-bottom: 0.65rem; font-size: 0.95rem; font-weight: 500;
+  cursor: pointer; transition: background 0.2s;
+}
+.glass-row:hover { background: var(--teal-glass2); }
+.glass-row .row-icon { font-size: 1.1rem; }
+.glass-row .row-edit { margin-left: auto; opacity: 0.7; font-size: 0.85rem; }
+
+/* ── BUTTONS ── */
+.btn-sand {
+  display: block; width: 100%; max-width: 260px; margin: 1.25rem auto 0;
+  background: var(--sand); color: var(--teal-dark);
+  font-family: var(--sans); font-size: 1rem; font-weight: 600;
+  border: none; border-radius: 50px; padding: 0.85rem 2rem;
+  cursor: pointer; transition: background 0.2s, transform 0.1s;
+  text-align: center;
+}
+.btn-sand:hover { background: #fff; }
+.btn-sand:active { transform: scale(0.97); }
+
+.btn-glass {
+  display: block; width: 100%; max-width: 260px; margin: 0.65rem auto 0;
+  background: var(--teal-glass); color: #fff;
+  font-family: var(--sans); font-size: 1rem; font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 50px; padding: 0.85rem 2rem;
+  cursor: pointer; transition: background 0.2s;
+  text-align: center;
+}
+.btn-glass:hover { background: var(--teal-glass2); }
+
+.btn-pair { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.25rem; }
+.btn-pair .btn-sand, .btn-pair .btn-glass { margin: 0; flex: 1; max-width: 160px; }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+  color: #fff;
+}
+
+/* ── HERO SCREEN ── */
+#screen-hero {
+  background: linear-gradient(to bottom, rgba(30,90,90,0.8), rgba(20,60,60,0.95)),
+              url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect fill='%231E5A5A' width='100%25' height='100%25'/%3E%3C/svg%3E");
+  justify-content: center; align-items: center; text-align: center;
+  padding: 2rem;
+}
+.hero-brand {
+  font-family: var(--serif);
+  font-size: 3.5rem;
+  font-style: italic;
+  color: var(--sand);
+  margin-bottom: 0.5rem;
+}
+.hero-plane { font-size: 2rem; display: block; margin-bottom: 1rem; }
+.hero-tagline {
+  font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--ink-muted); margin-bottom: 2.5rem;
+}
+.hero-input-wrap { position: relative; max-width: 340px; margin: 0 auto 1rem; }
+.hero-input {
+  width: 100%; background: var(--teal-glass); border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 50px; padding: 0.9rem 1.5rem;
+  font-family: var(--sans); font-size: 1rem; color: #fff;
+  outline: none;
+}
+.hero-input::placeholder { color: rgba(255,255,255,0.45); }
+.hero-input:focus { border-color: rgba(255,255,255,0.5); background: var(--teal-glass2); }
+.hero-divider { color: var(--ink-muted); font-size: 0.8rem; margin: 1rem 0; }
+.hero-create { font-size: 0.9rem; color: var(--sand); cursor: pointer; text-decoration: underline; }
+
+/* ── CONFIRM SCREEN ── */
+.confirm-name {
+  font-family: var(--serif); font-size: 1.8rem; font-style: italic;
+  color: var(--sand); margin-bottom: 1.5rem;
+}
+
+/* ── INTERESTS GRID ── */
+.interests-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.interest-chip {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: var(--teal-glass); border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 8px; padding: 0.6rem 0.75rem;
+  font-size: 0.82rem; cursor: pointer; transition: all 0.15s;
+}
+.interest-chip.selected {
+  background: rgba(240,234,214,0.25);
+  border-color: var(--sand);
+  color: var(--sand);
+}
+.interest-chip .chip-check { opacity: 0; font-size: 0.7rem; }
+.interest-chip.selected .chip-check { opacity: 1; }
+
+/* ── ITINERARY ── */
+.itinerary-item {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--teal-glass); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50px; padding: 0.85rem 1.25rem;
+  margin-bottom: 0.6rem; font-size: 0.95rem;
+}
+.itin-time { font-weight: 700; min-width: 40px; color: var(--sand); font-size: 0.9rem; }
+.itin-label { flex: 1; }
+.itin-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sand-mid); flex-shrink: 0; }
+
+/* ── BOOKINGS ── */
+.booking-card {
+  background: var(--teal-glass); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 16px; padding: 1.25rem; margin-bottom: 1rem;
+}
+.booking-header {
+  display: flex; align-items: center; justify-content: space-between;
+  font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem;
+}
+.booking-detail {
+  background: rgba(0,0,0,0.15); border-radius: 8px;
+  padding: 0.5rem 0.85rem; margin-bottom: 0.4rem;
+  font-size: 0.88rem; color: rgba(255,255,255,0.85);
+}
+
+/* ── MARKETPLACE ── */
+.market-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.25rem; }
+.market-card {
+  background: var(--teal-glass); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 14px; overflow: hidden; cursor: pointer;
+  transition: border-color 0.2s;
+}
+.market-card:hover { border-color: var(--sand); }
+.market-img {
+  width: 100%; height: 100px; object-fit: cover;
+  background: var(--teal-mid); display: flex; align-items: center;
+  justify-content: center; font-size: 2.5rem;
+}
+.market-info { padding: 0.65rem 0.75rem; }
+.market-name { font-size: 0.85rem; font-weight: 500; margin-bottom: 0.2rem; }
+.market-sub { font-size: 0.75rem; color: var(--ink-muted); }
+
+/* ── CHALLENGE ── */
+.challenge-location {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--teal-glass2); border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 50px; padding: 0.85rem 1.25rem;
+  font-weight: 600; margin-bottom: 1.25rem;
+}
+.challenge-item {
+  display: flex; align-items: center; gap: 0.85rem;
+  background: var(--teal-glass); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px; padding: 0.85rem 1.1rem;
+  margin-bottom: 0.65rem; font-size: 0.9rem; cursor: pointer;
+  transition: background 0.2s;
+}
+.challenge-item:hover { background: var(--teal-glass2); }
+.challenge-item.done { opacity: 0.5; text-decoration: line-through; }
+.challenge-camera { font-size: 1.2rem; }
+
+/* ── AGES INPUT ── */
+.ages-input {
+  width: 100%; background: var(--teal-glass); border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 50px; padding: 0.75rem 1.25rem;
+  font-family: var(--sans); font-size: 0.95rem; color: #fff;
+  outline: none; margin-bottom: 1.25rem;
+}
+.ages-input::placeholder { color: rgba(255,255,255,0.45); }
+
+/* ── FILTER TABS ── */
+.filter-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.filter-tab {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: var(--teal-glass); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50px; padding: 0.4rem 0.9rem;
+  font-size: 0.82rem; cursor: pointer; color: #fff;
+  transition: background 0.15s;
+}
+.filter-tab.active { background: rgba(240,234,214,0.3); border-color: var(--sand); color: var(--sand); }
+
+@media (min-width: 500px) {
+  .screen { max-width: 420px; margin: 0 auto; }
+  body { display: flex; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HERO / LOGIN ═══════════ -->
+<div class="screen active" id="screen-hero">
+  <span class="hero-plane">✈️</span>
+  <div class="hero-brand">PlanIT</div>
+  <p class="hero-tagline">Have a tale behind your trip</p>
+
+  <div class="hero-input-wrap">
+    <input class="hero-input" type="text" id="username-input" placeholder="username" />
+  </div>
+  <div class="hero-input-wrap">
+    <input class="hero-input" type="password" placeholder="password" />
+  </div>
+  <button class="btn-sand" onclick="doLogin()" style="max-width:220px;">→</button>
+  <p class="hero-divider">—</p>
+  <span class="hero-create" onclick="doLogin()">New? Create Account</span>
+</div>
+
+<!-- ═══════════ CONFIRM DETAILS ═══════════ -->
+<div class="screen" id="screen-confirm">
+  <div class="topbar">
+    <div class="logo"><span class="logo-plane">✈️</span> PlanIT</div>
+    <button class="home-btn" onclick="goHome()">🏠</button>
+  </div>
+  <div class="content">
+    <p class="confirm-name" id="confirm-greeting">Alex, is this accurate?</p>
+    <div class="glass-row"><span class="row-icon">📍</span> Los Angeles, CA <span class="row-edit">✏️</span></div>
+    <div class="glass-row"><span class="row-icon">📅</span> Jun 20 – Jun 23, 2025 <span class="row-edit">✏️</span></div>
+    <div class="glass-row"><span class="row-icon">👥</span> 3 People <span class="row-edit">✏️</span></div>
+    <div class="glass-row"><span class="row-icon">💰</span> $5,000 budget <span class="row-edit">✏️</span></div>
+    <button class="btn-sand" onclick="goTo('screen-interests')">Yes →</button>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goHome()">🌐</button>
+    <button class="nav-item active">➕</button>
+    <button class="nav-item">⚙️</button>
+    <button class="nav-item">📍</button>
+    <button class="nav-item">☰</button>
+    <button class="nav-item">👤</button>
+  </div>
+</div>
+
+<!-- ═══════════ PERSONALIZATIONS ═══════════ -->
+<div class="screen" id="screen-interests">
+  <div class="topbar">
+    <div class="logo"><span class="logo-plane">✈️</span> PlanIT</div>
+    <button class="home-btn" onclick="goHome()">🏠</button>
+  </div>
+  <div class="content">
+    <div class="section-title">Personalizations</div>
+    <div class="glass-row" style="margin-bottom:1.25rem;">
+      <span class="row-icon">👨‍👩‍👧</span> Ages: 38, 36, 12 <span class="row-edit">✏️</span>
+    </div>
+    <div class="interests-grid" id="interests-grid">
+      <!-- populated by JS -->
+    </div>
+    <button class="btn-sand" onclick="goTo('screen-itinerary')">Next →</button>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goHome()">🌐</button>
+    <button class="nav-item active">➕</button>
+    <button class="nav-item">⚙️</button>
+    <button class="nav-item">📍</button>
+    <button class="nav-item">☰</button>
+    <button class="nav-item">👤</button>
+  </div>
+</div>
+
+<!-- ═══════════ ITINERARY ═══════════ -->
+<div class="screen" id="screen-itinerary">
+  <div class="topbar">
+    <div class="logo"><span class="logo-plane">✈️</span> PlanIT</div>
+    <button class="home-btn" onclick="goHome()">🏠</button>
+  </div>
+  <div class="content">
+    <p class="section-title" id="itin-greeting">Alex, here you go.</p>
+    <div class="glass-row" style="border-radius:12px; margin-bottom:1rem;">
+      <span>☰</span> <strong>Day 1</strong> <span style="margin-left:auto;">▼</span>
+    </div>
+    <div class="itinerary-item"><span class="itin-time">8:30</span><span class="itin-label">Breakfast at Grand Central Market</span><span class="itin-dot"></span></div>
+    <div class="itinerary-item"><span class="itin-time">10:30</span><span class="itin-label">Visit the Getty Center</span><span class="itin-dot"></span></div>
+    <div class="itinerary-item"><span class="itin-time">1:00</span><span class="itin-label">Lunch at King Tacos</span><span class="itin-dot"></span></div>
+    <div class="itinerary-item"><span class="itin-time">2:00</span><span class="itin-label">Visit Malibu Beach</span><span class="itin-dot"></span></div>
+    <div class="itinerary-item"><span class="itin-time">6:00</span><span class="itin-label">Dinner at Nobu</span><span class="itin-dot"></span></div>
+    <div class="btn-pair">
+      <button class="btn-sand" onclick="goTo('screen-bookings')">Yes ✓</button>
+      <button class="btn-glass" onclick="goTo('screen-itinerary')">Regenerate ↺</button>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goHome()">🌐</button>
+    <button class="nav-item active">➕</button>
+    <button class="nav-item">⚙️</button>
+    <button class="nav-item">📍</button>
+    <button class="nav-item">☰</button>
+    <button class="nav-item">👤</button>
+  </div>
+</div>
+
+<!-- ═══════════ BOOKINGS ═══════════ -->
+<div class="screen" id="screen-bookings">
+  <div class="topbar">
+    <div class="logo"><span class="logo-plane">✈️</span> PlanIT</div>
+    <button class="home-btn" onclick="goHome()">🏠</button>
+  </div>
+  <div class="content">
+    <div class="section-title">Bookings</div>
+    <div class="booking-card">
+      <div class="booking-header">🏨 Beverly Hills Hotel <span>▼</span></div>
+      <div class="booking-detail">3 night stay · Jun 20–23, 2025</div>
+      <div class="booking-detail">2 king beds, suite</div>
+      <div class="booking-detail">$1,387 / night + tax</div>
+      <div class="booking-detail" style="color:var(--sand); font-weight:600;">$4,161 total + tax</div>
+    </div>
+    <div class="booking-card">
+      <div class="booking-header">✈️ Delta Flights <span>▼</span></div>
+      <div class="booking-detail">SFO → LAX · Jun 20, 7:45 AM</div>
+      <div class="booking-detail">LAX → SFO · Jun 23, 6:00 PM</div>
+      <div class="booking-detail" style="color:var(--sand); font-weight:600;">$840 total (3 passengers)</div>
+    </div>
+    <button class="btn-sand" onclick="goTo('screen-marketplace')">Next →</button>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goHome()">🌐</button>
+    <button class="nav-item active">➕</button>
+    <button class="nav-item">⚙️</button>
+    <button class="nav-item">📍</button>
+    <button class="nav-item">☰</button>
+    <button class="nav-item">👤</button>
+  </div>
+</div>
+
+<!-- ═══════════ MARKETPLACE ═══════════ -->
+<div class="screen" id="screen-marketplace">
+  <div class="topbar">
+    <div class="logo"><span class="logo-plane">✈️</span> PlanIT</div>
+    <button class="home-btn" onclick="goHome()">🏠</button>
+  </div>
+  <div class="content">
+    <p class="section-title" id="market-greeting">Trips Marketplace, Alex?</p>
+    <div class="filter-tabs">
+      <div class="filter-tab active">Content Creators ▼</div>
+      <div class="filter-tab">AI ▼</div>
+    </div>
+    <div class="market-grid">
+      <div class="market-card" onclick="goTo('screen-challenge')">
+        <div class="market-img">🏛️</div>
+        <div class="market-info">
+          <div class="market-name">Griffith Observatory</div>
+          <div class="market-sub">Mia Parker · $15</div>
+        </div>
+      </div>
+      <div class="market-card">
+        <div class="market-img">📚</div>
+        <div class="market-info">
+          <div class="market-name">LA Bookstores</div>
+          <div class="market-sub">Ethan Mitchell · $10</div>
+        </div>
+      </div>
+      <div class="market-card">
+        <div class="market-img">🌊</div>
+        <div class="market-info">
+          <div class="market-name">Santa Monica Pier</div>
+          <div class="market-sub">Aria Chen · $12</div>
+        </div>
+      </div>
+      <div class="market-card">
+        <div class="market-img">🌮</div>
+        <div class="market-info">
+          <div class="market-name">Food Truck Tour</div>
+          <div class="market-sub">AI Generated · Free</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-sand" onclick="goTo('screen-challenge')">Next →</button>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goHome()">🌐</button>
+    <button class="nav-item active">➕</button>
+    <button class="nav-item">⚙️</button>
+    <button class="nav-item">📍</button>
+    <button class="nav-item">☰</button>
+    <button class="nav-item">👤</button>
+  </div>
+</div>
+
+<!-- ═══════════ CHALLENGE ═══════════ -->
+<div class="screen" id="screen-challenge">
+  <div class="topbar">
+    <div class="logo"><span class="logo-plane">✈️</span> PlanIT</div>
+    <button class="home-btn" onclick="goHome()">🏠</button>
+  </div>
+  <div class="content">
+    <div class="section-title">Up for the challenge? 🎯</div>
+    <div class="challenge-location">
+      📍 Location: Malibu Beach <span>▼</span>
+    </div>
+    <div style="font-size:0.78rem; color:var(--ink-muted); margin-bottom:0.85rem; letter-spacing:0.05em; text-transform:uppercase;">Alex ▼</div>
+    <div class="challenge-item" onclick="toggleChallenge(this)">
+      <span class="challenge-camera">📸</span>
+      <span>Photo with a rock the size of your palm</span>
+    </div>
+    <div class="challenge-item" onclick="toggleChallenge(this)">
+      <span class="challenge-camera">📸</span>
+      <span>Photo next to the biggest piece of seaweed</span>
+    </div>
+    <div class="challenge-item" onclick="toggleChallenge(this)">
+      <span class="challenge-camera">📸</span>
+      <span>Photo in front of the sunset</span>
+    </div>
+    <button class="btn-sand" onclick="goTo('screen-done')" style="margin-top:1.5rem;">Done ✓</button>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-item" onclick="goHome()">🌐</button>
+    <button class="nav-item active">➕</button>
+    <button class="nav-item">⚙️</button>
+    <button class="nav-item">📍</button>
+    <button class="nav-item">☰</button>
+    <button class="nav-item">👤</button>
+  </div>
+</div>
+
+<!-- ═══════════ DONE ═══════════ -->
+<div class="screen" id="screen-done" style="justify-content:center; align-items:center; text-align:center; padding:2rem;">
+  <div style="font-size:3rem; margin-bottom:1rem;">🎉</div>
+  <div class="hero-brand" style="font-size:2rem; margin-bottom:0.5rem;">Your trip is planned!</div>
+  <p style="color:var(--ink-muted); font-size:0.95rem; margin-bottom:2rem;">LA awaits, Alex. Have a tale behind your trip.</p>
+  <div style="background:var(--teal-glass); border:1px solid rgba(255,255,255,0.2); border-radius:16px; padding:1.5rem; margin-bottom:2rem; text-align:left;">
+    <div style="font-size:0.78rem; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.75rem;">Trip Summary</div>
+    <div style="font-size:0.9rem; margin-bottom:0.4rem;">📍 Los Angeles, CA</div>
+    <div style="font-size:0.9rem; margin-bottom:0.4rem;">📅 Jun 20–23, 2025 · 3 days</div>
+    <div style="font-size:0.9rem; margin-bottom:0.4rem;">👥 3 people</div>
+    <div style="font-size:0.9rem; color:var(--sand); font-weight:600;">💰 $5,001 estimated total</div>
+  </div>
+  <button class="btn-sand" onclick="goHome()">Plan Another Trip ✈️</button>
+</div>
+
+<script>
+  const interests = [
+    { emoji: '🏄', label: 'water sports' },
+    { emoji: '🏛️', label: 'history' },
+    { emoji: '🌿', label: 'parks' },
+    { emoji: '🍜', label: 'food tour' },
+    { emoji: '🚗', label: 'scenic drives' },
+    { emoji: '🍷', label: 'wine tour' },
+    { emoji: '🌊', label: 'oceans' },
+    { emoji: '🌲', label: 'nature' },
+    { emoji: '🎢', label: 'theme parks' },
+    { emoji: '🥾', label: 'hiking' },
+    { emoji: '🚴', label: 'biking' },
+    { emoji: '🎨', label: 'art' },
+    { emoji: '💆', label: 'spas' },
+    { emoji: '🛍️', label: 'shopping' },
+    { emoji: '📸', label: 'photo spots' },
+  ];
+
+  const preSelected = ['water sports', 'parks', 'food tour', 'nature', 'theme parks', 'hiking', 'biking', 'shopping', 'photo spots'];
+
+  function buildInterests() {
+    const grid = document.getElementById('interests-grid');
+    grid.innerHTML = interests.map(i => `
+      <div class="interest-chip ${preSelected.includes(i.label) ? 'selected' : ''}" onclick="toggleInterest(this)">
+        <span>${i.emoji}</span>
+        <span>${i.label}</span>
+        <span class="chip-check">✓</span>
+      </div>
+    `).join('');
+  }
+
+  function toggleInterest(el) {
+    el.classList.toggle('selected');
+  }
+
+  function toggleChallenge(el) {
+    el.classList.toggle('done');
+  }
+
+  function doLogin() {
+    const name = document.getElementById('username-input').value.trim();
+    const displayName = name ? (name.charAt(0).toUpperCase() + name.slice(1)) : 'Alex';
+    document.getElementById('confirm-greeting').textContent = `${displayName}, is this accurate?`;
+    document.getElementById('itin-greeting').textContent = `${displayName}, here you go.`;
+    document.getElementById('market-greeting').textContent = `Trips Marketplace, ${displayName}?`;
+    goTo('screen-confirm');
+  }
+
+  function goTo(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function goHome() { goTo('screen-hero'); }
+
+  buildInterests();
+</script>
+</body>
+</html>
